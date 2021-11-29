@@ -18,14 +18,29 @@ trait DocDb {
 
 object DocDb extends DocDb {
 
-  private val baseAddress = "storage/"
-  def cleanup(collection: String): Unit = {
-    getCollectionFile(collection).delete()
+  private val baseAddress = {
+    new File("storage/").mkdirs()
+    "storage/"
   }
 
-  private def getCollectionFile(name: String): File = new File(
-    baseAddress + name + ".db"
-  )
+  def cleanup(collection: String): Unit = {
+    val f = getCollectionFile(collection)
+    if (f.exists())
+      getCollectionFile(collection).delete()
+  }
+
+  private def getCollectionFile(name: String): File = {
+    val f = new File(
+      baseAddress + name + ".db"
+    )
+
+    if (!f.exists()) {
+      val writer = new FileWriter(f)
+      writer.close()
+    }
+
+    f
+  }
 
   override def append(
       collection: String,

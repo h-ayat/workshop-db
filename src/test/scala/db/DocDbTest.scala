@@ -4,30 +4,25 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.BeforeAndAfter
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks._
+import org.scalacheck.Gen
 
 class DocDbTest extends AnyFlatSpec with Matchers with BeforeAndAfter {
 
-  "getAll" should "Work" in {
+  val docGen = for {
+    key <- Gen.asciiStr
+    value <- Gen.asciiStr
+  } yield Doc(key, value)
 
-    forAll { (a: String, b: String) =>
-      val doc = Doc(a, b)
+  val docsGen = Gen.listOf(docGen)
+
+  "db" should "Work" in {
+    forAll(docsGen) { docList =>
+      println(docList.length)
+      DocDb.cleanup("test")
+      docList.foreach(DocDb.append("test", _))
+      val all = DocDb.getAll("test")
+
+      docList shouldBe all
     }
-    val a = Doc("key1", "aosnteuhasoethusntao")
-    val b = Doc("key2", "aosnteuhasoethusntao")
-    val c = Doc("key3", "aosnteuhasoethusntao")
-
-    val allToWrite = a :: b :: c :: Nil
-    allToWrite.foreach(DocDb.append("test", _))
-
-    val all = DocDb.getAll("test")
-
-    allToWrite shouldBe all
-  }
-
-  "aoeu" should "aoeu" in {
-
-    val a = ???
-    // val result = mySin(a)
-
   }
 }
